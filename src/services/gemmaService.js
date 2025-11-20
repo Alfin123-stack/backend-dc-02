@@ -2,10 +2,9 @@ import axios from "axios";
 import { buildGemmaPrompt } from "../utils/gemma/gemmaPromptBuilder.js";
 
 const OLLAMA_API_URL =
-  process.env.OLLAMA_API_URL || "http://localhost:11434/api/generate";
+  process.env.OLLAMA_API_URL || "https://backend-dc-02.vercel.app/api/generate";
 
-const MODEL_NAME =
-  process.env.GEMMA_MODEL || "qwen2.5:7b-instruct-q4_K_M";
+const MODEL_NAME = process.env.GEMMA_MODEL || "qwen2.5:7b-instruct-q4_K_M";
 
 // Clean response - lebih aggressive
 const sanitizeResponse = (text) => {
@@ -25,34 +24,40 @@ const validateAndFixJSON = (jsonObj) => {
   }
 
   // Fix setiap question
-  jsonObj.questions = jsonObj.questions.map((q, index) => {
-    // Pastikan struktur dasar ada
-    if (!q.question || !q.type || !q.options) {
-      console.warn(`⚠️ Question ${index + 1} has missing fields, skipping...`);
-      return null;
-    }
+  jsonObj.questions = jsonObj.questions
+    .map((q, index) => {
+      // Pastikan struktur dasar ada
+      if (!q.question || !q.type || !q.options) {
+        console.warn(
+          `⚠️ Question ${index + 1} has missing fields, skipping...`
+        );
+        return null;
+      }
 
-    // Pastikan semua opsi punya feedback
-    const fixedOptions = {};
-    for (const [key, opt] of Object.entries(q.options)) {
-      fixedOptions[key] = {
-        text: opt.text || "",
-        isCorrect: opt.isCorrect || false,
-        feedback: opt.feedback || generateDefaultFeedback(opt.text, opt.isCorrect)
+      // Pastikan semua opsi punya feedback
+      const fixedOptions = {};
+      for (const [key, opt] of Object.entries(q.options)) {
+        fixedOptions[key] = {
+          text: opt.text || "",
+          isCorrect: opt.isCorrect || false,
+          feedback:
+            opt.feedback || generateDefaultFeedback(opt.text, opt.isCorrect),
+        };
+      }
+
+      // Pastikan explanation ada
+      const explanation =
+        q.explanation ||
+        "Untuk pemahaman lebih lanjut, silakan review kembali materi terkait konsep ini.";
+
+      return {
+        question: q.question,
+        type: q.type,
+        options: fixedOptions,
+        explanation: explanation,
       };
-    }
-
-    // Pastikan explanation ada
-    const explanation = q.explanation || 
-      "Untuk pemahaman lebih lanjut, silakan review kembali materi terkait konsep ini.";
-
-    return {
-      question: q.question,
-      type: q.type,
-      options: fixedOptions,
-      explanation: explanation
-    };
-  }).filter(q => q !== null); // Hapus yang null
+    })
+    .filter((q) => q !== null); // Hapus yang null
 
   return jsonObj;
 };
@@ -79,12 +84,12 @@ export const generateQuestionGemma = async (content, count = 5) => {
       prompt,
       stream: false,
       options: {
-        temperature: 0.7,      // Kreativitas sedang
-        top_p: 0.9,           // Fokus pada token berkualitas
-        top_k: 40,            // Batasi pilihan token
-        repeat_penalty: 1.1,   // Hindari pengulangan
-        num_predict: 4096,    // Max tokens output
-      }
+        temperature: 0.7, // Kreativitas sedang
+        top_p: 0.9, // Fokus pada token berkualitas
+        top_k: 40, // Batasi pilihan token
+        repeat_penalty: 1.1, // Hindari pengulangan
+        num_predict: 4096, // Max tokens output
+      },
     });
 
     if (!response.data || !response.data.response) {
@@ -110,10 +115,11 @@ export const generateQuestionGemma = async (content, count = 5) => {
     // Validasi dan perbaiki struktur
     jsonOutput = validateAndFixJSON(jsonOutput);
 
-    console.log(`✅ Successfully generated ${jsonOutput.questions.length} questions`);
+    console.log(
+      `✅ Successfully generated ${jsonOutput.questions.length} questions`
+    );
 
     return JSON.stringify(jsonOutput, null, 2);
-
   } catch (err) {
     console.error("❌ Error generateQuestionGemma:", err.message);
     if (err.response) {
