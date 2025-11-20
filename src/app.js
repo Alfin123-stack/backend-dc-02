@@ -1,11 +1,10 @@
-// app.js
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import geminiRoutes from "./routes/tutorialRoutes.js";   
-import userRoutes from "./routes/userRoutes.js";          
-import gemmaRoutes from "./routes/GemmaRoute.js";         
+import geminiRoutes from "./routes/tutorialRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import gemmaRoutes from "./routes/GemmaRoute.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
@@ -18,15 +17,18 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health Check
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server is running normally" });
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running normally",
+  });
 });
 
-// Route Registrations
-app.use("/api/ai", geminiRoutes);    
-app.use("/api/users", userRoutes);    
-app.use("/api/quiz", gemmaRoutes);    
+// Routes
+app.use("/api/ai", geminiRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/quiz", gemmaRoutes);
 
-// 404 handler
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({
     status: "error",
@@ -34,7 +36,7 @@ app.use((req, res) => {
   });
 });
 
-// error handler
+// Global Error Handler
 app.use(errorHandler);
 
 export default app;
