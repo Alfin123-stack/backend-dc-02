@@ -52,9 +52,7 @@ export const fetchTutorialById = async (tutorialId) => {
     } catch (err) {
       console.warn("⚠️ External API failed, switching to local JSON fallback");
       console.warn(
-        err.response
-          ? `External API Error ${err.response.status}`
-          : err.message
+        err.response ? `External API Error ${err.response.status}` : err.message
       );
     }
   }
