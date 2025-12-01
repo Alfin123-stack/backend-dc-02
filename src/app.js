@@ -9,51 +9,71 @@ const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("src", "apidocs.json"), "utf-8")
 );
 
-import aiRoutes from "./routes/tutorialRoutes.js";
+import quizRoutes from "./routes/tutorialRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 
 // ============================================================
-// 🌐 Global Middlewares
+// 🔥 FIX CORS WAJIB UNTUK VERCEL SERVERLESS
 // ============================================================
-app.use(helmet()); // Security headers
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Preflight request
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// ============================================================
+// 🌐 Middlewares
+// ============================================================
+app.use(helmet());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// OPTIONAL CORS (tidak masalah jika tetap ada)
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://front-end-dc-02.vercel.app"],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(express.json()); // JSON body parser
-app.use(express.urlencoded({ extended: true })); // Form parser
 
 // ============================================================
-// 🩺 Health Check Endpoint
+// 🩺 Health Check
 // ============================================================
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
-    message: "Server is running normally",
+    message: "Server running normally",
   });
 });
 
 // ============================================================
-// 🚏 Route Registration
+// 🛣 Routes
 // ============================================================
-app.use("/api/", aiRoutes);
+app.use("/api", quizRoutes);
 app.use("/api/users", userRoutes);
 
 // ============================================================
-// 📚 Swagger API Documentation
+// 📚 Swagger
 // ============================================================
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ============================================================
-// ❌ 404 Not Found Handler
+// ❌ 404
 // ============================================================
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
     status: "error",
     message: `Route ${req.originalUrl} not found`,
@@ -61,7 +81,7 @@ app.use((req, res, next) => {
 });
 
 // ============================================================
-// 🛠️ Global Error Handler (MUST BE LAST)
+// 🛠 Global Error Handler
 // ============================================================
 app.use(errorHandler);
 
