@@ -19,7 +19,13 @@ const app = express();
 // 🌐 Global Middlewares
 // ============================================================
 app.use(helmet()); // Security headers
-app.use(cors()); // CORS protection
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://front-end-dc-02.vercel.app"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json()); // JSON body parser
 app.use(express.urlencoded({ extended: true })); // Form parser
 
