@@ -1,19 +1,8 @@
 // services/tutorialService.js
 import axios from "axios";
 import dotenv from "dotenv";
-import { readFileSync } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
 dotenv.config();
-
-// ES Module dirname fix
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load local tutorials.json
-const tutorialsPath = path.join(__dirname, "../data/tutorials.json");
-const localTutorials = JSON.parse(readFileSync(tutorialsPath, "utf-8"));
 
 // External API
 const BASE_URL = process.env.EXTERNAL_API_BASE || null;
@@ -30,7 +19,6 @@ const api = BASE_URL
  * 📘 Fetch Tutorial by ID
  * Priority:
  * 1. External API (if configured)
- * 2. Local tutorials.json
  * ============================================================
  */
 export const fetchTutorialById = async (tutorialId) => {
@@ -56,19 +44,4 @@ export const fetchTutorialById = async (tutorialId) => {
       );
     }
   }
-
-  // 2️⃣ Local JSON fallback
-  const tutorial = localTutorials.find(
-    (t) => Number(t.id) === Number(tutorialId)
-  );
-
-  if (!tutorial) {
-    throw new Error(
-      `Tutorial with ID ${tutorialId} not found (external + local failed)`
-    );
-  }
-
-  console.log("✅ Local fallback tutorial selected:", tutorial.title);
-
-  return tutorial;
 };

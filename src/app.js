@@ -16,30 +16,33 @@ import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 
 // ============================================================
-// 🔥 CORS WAJIB (VERSI BENAR UNTUK VERCEL)
+// ✅ CORS FIX (VERSI STABIL UNTUK LOCAL & VERCEL)
 // ============================================================
 const allowedOrigins = [
   "http://localhost:5173",
   "https://front-end-dc-02.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS blocked: " + origin));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-// Preflight
-app.options("*", cors());
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 // ============================================================
 // 🌐 Middlewares
@@ -47,7 +50,7 @@ app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Pasang helmet SETELAH CORS
+// Helmet setelah CORS
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
@@ -77,7 +80,7 @@ app.use("/api/users", userRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ============================================================
-// ❌ 404
+// ❌ 404 Handler
 // ============================================================
 app.use((req, res) => {
   res.status(404).json({
