@@ -16,36 +16,42 @@ import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 
 // ============================================================
-// 🔥 FIX CORS WAJIB UNTUK VERCEL SERVERLESS
+// 🔥 CORS WAJIB (VERSI BENAR UNTUK VERCEL)
 // ============================================================
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-  );
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://front-end-dc-02.vercel.app",
+];
 
-  // Preflight request
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS blocked: " + origin));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// Preflight
+app.options("*", cors());
 
 // ============================================================
 // 🌐 Middlewares
 // ============================================================
-app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// OPTIONAL CORS (tidak masalah jika tetap ada)
+// Pasang helmet SETELAH CORS
 app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://front-end-dc-02.vercel.app"],
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
   })
 );
 
