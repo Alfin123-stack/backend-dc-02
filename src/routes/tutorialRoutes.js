@@ -12,17 +12,7 @@ const progressKey = (userId, tutorialId) =>
 /* ======================================================
    1. GENERATE QUIZ (menyimpan quiz_cache di NodeCache)
 =======================================================*/
-router.post("/quiz/generate", async (req, res) => {
-  try {
-    await generateQuiz(req, res);
-  } catch (err) {
-    console.error("Error generate quiz:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal generate quiz",
-    });
-  }
-});
+router.post("/quiz/generate", generateQuiz);
 
 /* ======================================================
    2. SAVE PROGRESS (quiz_progress)
