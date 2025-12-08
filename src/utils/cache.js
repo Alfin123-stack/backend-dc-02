@@ -1,6 +1,8 @@
 import NodeCache from "node-cache";
 
-// TTL = 24 jam (86400 detik)
-const cache = new NodeCache({ stdTTL: 86400, checkperiod: 120 });
+const quizCache = new NodeCache({
+  stdTTL: 60 * 60, // TTL 1 jam
+  checkperiod: 120,
+});
 
-export default cache;
+export default quizCache;

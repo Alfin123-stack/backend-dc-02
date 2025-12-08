@@ -1,14 +1,12 @@
 // controllers/quizController.js
-import cache from "../utils/cache.js";
 import { fetchTutorialById } from "../services/tutorialService.js";
 import { generateQuizFromContent } from "../services/geminiService.js";
 
 // ===============================
-// GENERATE QUIZ + CACHING
+// GENERATE QUIZ (NO CACHE)
 // ===============================
 export const generateQuiz = async (req, res, next) => {
   try {
-    const userId = req.user.id; // Harus dari auth middleware
     const { tutorialId } = req.body;
 
     if (!tutorialId) {
@@ -18,18 +16,7 @@ export const generateQuiz = async (req, res, next) => {
       });
     }
 
-    // Cek cache
-    const cachedQuiz = cache.get(`quiz_${userId}_${tutorialId}`);
-    if (cachedQuiz) {
-      return res.status(200).json({
-        success: true,
-        message: "Quiz loaded from cache",
-        fromCache: true,
-        ...cachedQuiz,
-      });
-    }
-
-    // Ambil tutorial
+    // Ambil tutorial langsung dari DB
     const tutorial = await fetchTutorialById(tutorialId);
     const content = tutorial?.content || "";
 
@@ -70,13 +57,9 @@ export const generateQuiz = async (req, res, next) => {
       quiz,
     };
 
-    // Simpan ke cache
-    cache.set(`quiz_${userId}_${tutorialId}`, responseData);
-
     return res.status(200).json({
       success: true,
       message: "Quiz generated successfully",
-      fromCache: false,
       ...responseData,
     });
   } catch (err) {
@@ -86,39 +69,22 @@ export const generateQuiz = async (req, res, next) => {
 };
 
 // ===============================
-// RESUME QUIZ
+// RESUME QUIZ (HAPUS CACHE → AUTO FAIL)
+// Bisa kamu ubah untuk load progress dari DB jika perlu
 // ===============================
 export const resumeQuiz = (req, res) => {
-  const userId = req.user.id;
-  const { tutorialId } = req.query;
-
-  const data = cache.get(`quiz_${userId}_${tutorialId}`);
-
-  if (!data) {
-    return res.status(404).json({
-      success: false,
-      message: "No existing quiz found",
-    });
-  }
-
-  return res.status(200).json({
-    success: true,
-    message: "Quiz resumed successfully",
-    ...data,
+  return res.status(404).json({
+    success: false,
+    message: "Resume quiz is disabled because caching was removed.",
   });
 };
 
 // ===============================
-// FINISH QUIZ
+// FINISH QUIZ (NO CACHE TO DELETE)
 // ===============================
 export const finishQuiz = (req, res) => {
-  const userId = req.user.id;
-  const { tutorialId } = req.body;
-
-  cache.del(`quiz_${userId}_${tutorialId}`);
-
   return res.status(200).json({
     success: true,
-    message: "Quiz finished and deleted",
+    message: "Quiz finished (no cache used).",
   });
 };
