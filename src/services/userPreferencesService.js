@@ -66,33 +66,3 @@ export const fetchUserPreferences = async (userId) => {
     throw formatAxiosError(error, "Failed to fetch user preferences");
   }
 };
-
-/**
- * ============================================================
- * ✏️ Update User Preferences
- * ============================================================
- * @param {string|number} userId - User ID
- * @param {Object} payload - Updated preference data
- * @returns {Promise<Object|null>}
- */
-export const updateUserPreferencesService = async (userId, payload) => {
-  try {
-    if (!userId) {
-      throw new Error("userId is required");
-    }
-
-    if (!payload || typeof payload !== "object") {
-      throw new Error("payload must be a valid object");
-    }
-
-    const response = await api.patch(
-      `/api/users/${userId}/preferences`,
-      payload,
-      { headers: { "Content-Type": "application/json" } }
-    );
-
-    return response.data?.data || null;
-  } catch (error) {
-    throw formatAxiosError(error, "Failed to update user preferences");
-  }
-};
