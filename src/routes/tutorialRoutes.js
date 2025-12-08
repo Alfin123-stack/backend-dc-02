@@ -1,6 +1,5 @@
 import express from "express";
 import { generateQuiz } from "../controllers/geminiQuizController.js";
-import authMiddleware from "../middleware/auth.js";
 import quizCache from "../utils/cache.js";
 
 const router = express.Router();
@@ -13,12 +12,22 @@ const progressKey = (userId, tutorialId) =>
 /* ======================================================
    1. GENERATE QUIZ (menyimpan quiz_cache di NodeCache)
 =======================================================*/
-router.post("/quiz/generate", authMiddleware, generateQuiz);
+router.post("/quiz/generate", async (req, res) => {
+  try {
+    await generateQuiz(req, res);
+  } catch (err) {
+    console.error("Error generate quiz:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal generate quiz",
+    });
+  }
+});
 
 /* ======================================================
    2. SAVE PROGRESS (quiz_progress)
 =======================================================*/
-router.post("/quiz/progress", authMiddleware, (req, res) => {
+router.post("/quiz/progress", (req, res) => {
   const { tutorialId, userId, progress } = req.body;
 
   if (!tutorialId || !userId || !progress) {
@@ -28,8 +37,7 @@ router.post("/quiz/progress", authMiddleware, (req, res) => {
     });
   }
 
-  const key = progressKey(userId, tutorialId);
-  quizCache.set(key, progress);
+  quizCache.set(progressKey(userId, tutorialId), progress);
 
   return res.json({
     success: true,
@@ -40,7 +48,7 @@ router.post("/quiz/progress", authMiddleware, (req, res) => {
 /* ======================================================
    3. GET PROGRESS (quiz_progress)
 =======================================================*/
-router.get("/quiz/progress", authMiddleware, (req, res) => {
+router.get("/quiz/progress", (req, res) => {
   const { tutorialId, userId } = req.query;
 
   if (!tutorialId || !userId) {
@@ -50,8 +58,7 @@ router.get("/quiz/progress", authMiddleware, (req, res) => {
     });
   }
 
-  const key = progressKey(userId, tutorialId);
-  const progress = quizCache.get(key);
+  const progress = quizCache.get(progressKey(userId, tutorialId));
 
   return res.json({
     success: true,
@@ -62,7 +69,7 @@ router.get("/quiz/progress", authMiddleware, (req, res) => {
 /* ======================================================
    4. GET QUIZ CACHE (soal quiz)
 =======================================================*/
-router.get("/quiz/cache", authMiddleware, (req, res) => {
+router.get("/quiz/cache", (req, res) => {
   const { tutorialId, userId } = req.query;
 
   if (!tutorialId || !userId) {
@@ -72,8 +79,7 @@ router.get("/quiz/cache", authMiddleware, (req, res) => {
     });
   }
 
-  const key = quizKey(userId, tutorialId);
-  const data = quizCache.get(key);
+  const data = quizCache.get(quizKey(userId, tutorialId));
 
   return res.json({
     success: true,
@@ -82,9 +88,9 @@ router.get("/quiz/cache", authMiddleware, (req, res) => {
 });
 
 /* ======================================================
-   5. DELETE QUIZ CACHE + PROGRESS (ketika quiz selesai)
+   5. DELETE QUIZ CACHE + PROGRESS
 =======================================================*/
-router.delete("/quiz/clear", authMiddleware, (req, res) => {
+router.delete("/quiz/clear", (req, res) => {
   const { tutorialId, userId } = req.body;
 
   if (!tutorialId || !userId) {
@@ -94,8 +100,8 @@ router.delete("/quiz/clear", authMiddleware, (req, res) => {
     });
   }
 
-  quizCache.del(quizKey(userId, tutorialId)); // hapus soal
-  quizCache.del(progressKey(userId, tutorialId)); // hapus progress
+  quizCache.del(quizKey(userId, tutorialId));
+  quizCache.del(progressKey(userId, tutorialId));
 
   return res.json({
     success: true,
