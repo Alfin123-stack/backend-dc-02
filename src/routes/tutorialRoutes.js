@@ -4,10 +4,12 @@ import quizCache from "../utils/cache.js";
 
 const router = express.Router();
 
-// Helper bikin key rapi
-const quizKey = (userId, tutorialId) => `quiz_cache:${userId}:${tutorialId}`;
-const progressKey = (userId, tutorialId) =>
-  `quiz_progress:${userId}:${tutorialId}`;
+// Helper bikin key rapi (tambahkan level)
+const quizKey = (userId, tutorialId, level) =>
+  `quiz_cache:${userId}:${tutorialId}:${level}`;
+
+const progressKey = (userId, tutorialId, level) =>
+  `quiz_progress:${userId}:${tutorialId}:${level}`;
 
 /* ======================================================
    1. GENERATE QUIZ (menyimpan quiz_cache di NodeCache)
@@ -18,16 +20,16 @@ router.post("/quiz/generate", generateQuiz);
    2. SAVE PROGRESS (quiz_progress)
 =======================================================*/
 router.post("/quiz/progress", (req, res) => {
-  const { tutorialId, userId, progress } = req.body;
+  const { tutorialId, userId, level, progress } = req.body;
 
-  if (!tutorialId || !userId || !progress) {
+  if (!tutorialId || !userId || !level || !progress) {
     return res.status(400).json({
       success: false,
-      message: "tutorialId, userId, dan progress wajib diisi",
+      message: "tutorialId, userId, level, dan progress wajib diisi",
     });
   }
 
-  quizCache.set(progressKey(userId, tutorialId), progress);
+  quizCache.set(progressKey(userId, tutorialId, level), progress);
 
   return res.json({
     success: true,
@@ -39,16 +41,16 @@ router.post("/quiz/progress", (req, res) => {
    3. GET PROGRESS (quiz_progress)
 =======================================================*/
 router.get("/quiz/progress", (req, res) => {
-  const { tutorialId, userId } = req.query;
+  const { tutorialId, userId, level } = req.query;
 
-  if (!tutorialId || !userId) {
+  if (!tutorialId || !userId || !level) {
     return res.status(400).json({
       success: false,
-      message: "tutorialId dan userId wajib",
+      message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  const progress = quizCache.get(progressKey(userId, tutorialId));
+  const progress = quizCache.get(progressKey(userId, tutorialId, level));
 
   return res.json({
     success: true,
@@ -60,16 +62,16 @@ router.get("/quiz/progress", (req, res) => {
    4. GET QUIZ CACHE (soal quiz)
 =======================================================*/
 router.get("/quiz/cache", (req, res) => {
-  const { tutorialId, userId } = req.query;
+  const { tutorialId, userId, level } = req.query;
 
-  if (!tutorialId || !userId) {
+  if (!tutorialId || !userId || !level) {
     return res.status(400).json({
       success: false,
-      message: "tutorialId dan userId wajib",
+      message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  const data = quizCache.get(quizKey(userId, tutorialId));
+  const data = quizCache.get(quizKey(userId, tutorialId, level));
 
   return res.json({
     success: true,
@@ -81,21 +83,26 @@ router.get("/quiz/cache", (req, res) => {
    5. DELETE QUIZ CACHE + PROGRESS
 =======================================================*/
 router.delete("/quiz/clear", (req, res) => {
-  const { tutorialId, userId } = req.body;
+  const { tutorialId, userId, level } = req.body;
+  const { cache = "true", progress = "true" } = req.query;
 
-  if (!tutorialId || !userId) {
+  if (!tutorialId || !userId || !level) {
     return res.status(400).json({
       success: false,
-      message: "tutorialId dan userId wajib",
+      message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  quizCache.del(quizKey(userId, tutorialId));
-  quizCache.del(progressKey(userId, tutorialId));
+  // Convert query to boolean
+  const clearCache = cache === "true";
+  const clearProgress = progress === "true";
+
+  if (clearCache) quizCache.del(quizKey(userId, tutorialId, level));
+  if (clearProgress) quizCache.del(progressKey(userId, tutorialId, level));
 
   return res.json({
     success: true,
-    message: "Quiz cache & progress deleted",
+    message: "Quiz cache/progress berhasil dihapus",
   });
 });
 
