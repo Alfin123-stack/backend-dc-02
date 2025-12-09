@@ -1,48 +1,18 @@
-// utils/quizPromptBuilder.js
+import {
+  buildQuizPromptLevel1,
+  buildQuizPromptLevel2,
+  buildQuizPromptLevel3,
+} from "./quizPromptLevels.js";
 
-export const buildQuizPrompt = (htmlContent, count) => `
-Kamu adalah AI pembuat soal profesional untuk platform edukasi digital.
-
-Buatkan ${count} soal kuis berbasis materi berikut:
-
-=== MATERI DIMULAI ===
-${htmlContent}
-=== MATERI SELESAI ===
-
-
-====================================================================
-📘 INSTRUKSI OUTPUT WAJIB (HARUS DIIKUTI 100%)
-====================================================================
-
-1. Output akhir HARUS berupa JSON array valid.  
-   TANPA markdown. TANPA teks tambahan.
-
-2. Struktur setiap soal:
-{
-  "question": "",
-  "type": "multiple_choice" | "multiple_answer",
-  "options": {
-    "A": { "text": "", "isCorrect": false, "feedback": "" },
-    "B": { "text": "", "isCorrect": false, "feedback": "" },
-    "C": { "text": "", "isCorrect": false, "feedback": "" },
-    "D": { "text": "", "isCorrect": false, "feedback": "" },
-    "E": { "text": "", "isCorrect": false, "feedback": "" }
+export const buildQuizPrompt = (htmlContent, count, level) => {
+  switch (level) {
+    case 1:
+      return buildQuizPromptLevel1(htmlContent, count);
+    case 2:
+      return buildQuizPromptLevel2(htmlContent, count);
+    case 3:
+      return buildQuizPromptLevel3(htmlContent, count);
+    default:
+      return buildQuizPromptLevel1(htmlContent, count); // fallback
   }
-}
-
-3. Aturan tipe soal:
-- multiple_choice → hanya 1 jawaban benar.
-- multiple_answer → wajib 2–3 jawaban benar.
-
-4. Semua feedback harus unik, jelas, dan mengacu pada materi.
-
-5. Tidak boleh menggunakan placeholder, opsi absurd, atau kalimat berulang.
-
-6. JSON VALID:
-   - Tidak boleh ada trailing comma.
-   - Hanya keluarkan JSON array murni.
-
-====================================================================
-OUTPUT HARUS JSON ARRAY VALID
-====================================================================
-`;
+};

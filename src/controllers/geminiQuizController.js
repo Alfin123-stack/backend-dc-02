@@ -7,12 +7,19 @@ import { generateQuizFromContent } from "../services/geminiService.js";
 // ===============================
 export const generateQuiz = async (req, res, next) => {
   try {
-    const { tutorialId } = req.body;
+    const { tutorialId, level } = req.body;
 
     if (!tutorialId) {
       return res.status(400).json({
         success: false,
         message: "tutorialId is required",
+      });
+    }
+
+    if (![1, 2, 3].includes(level)) {
+      return res.status(400).json({
+        success: false,
+        message: "level must be 1, 2, or 3",
       });
     }
 
@@ -32,8 +39,8 @@ export const generateQuiz = async (req, res, next) => {
       tutorial.title ||
       `Tutorial ${tutorialId}`;
 
-    // Generate quiz
-    const quiz = await generateQuizFromContent(content, 5);
+    // Generate quiz sesuai level
+    const quiz = await generateQuizFromContent(content, 3, level);
 
     if (!Array.isArray(quiz) || quiz.length === 0) {
       return res.status(500).json({
@@ -48,6 +55,7 @@ export const generateQuiz = async (req, res, next) => {
         title: extractedTitle,
       },
       meta: {
+        level,
         totalQuestions: quiz.length,
         multiple_choice: quiz.filter((q) => q.type === "multiple_choice")
           .length,
@@ -66,25 +74,4 @@ export const generateQuiz = async (req, res, next) => {
     console.error("❌ Error in generateQuiz:", err.message);
     next(err);
   }
-};
-
-// ===============================
-// RESUME QUIZ (HAPUS CACHE → AUTO FAIL)
-// Bisa kamu ubah untuk load progress dari DB jika perlu
-// ===============================
-export const resumeQuiz = (req, res) => {
-  return res.status(404).json({
-    success: false,
-    message: "Resume quiz is disabled because caching was removed.",
-  });
-};
-
-// ===============================
-// FINISH QUIZ (NO CACHE TO DELETE)
-// ===============================
-export const finishQuiz = (req, res) => {
-  return res.status(200).json({
-    success: true,
-    message: "Quiz finished (no cache used).",
-  });
 };
