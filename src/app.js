@@ -9,7 +9,7 @@ const swaggerDocument = JSON.parse(
   fs.readFileSync(path.resolve("src", "apidocs.json"), "utf-8")
 );
 
-import quizRoutes from "./routes/tutorialRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 

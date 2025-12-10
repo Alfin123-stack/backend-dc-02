@@ -1,7 +1,7 @@
 import express from "express";
 import {
   generateQuiz,
-  // getTutorialHeading,
+  getTutorialHeading,
 } from "../controllers/quizController.js";
 import {
   saveProgress,
@@ -27,7 +27,7 @@ router.get("/quiz/cache", getQuizCache);
 /* 5. CLEAR CACHE */
 router.delete("/quiz/clear", clearQuizCache);
 
-// /* 6. GET HEADING */
-// router.get("/tutorial/heading", getTutorialHeading);
+/* 6. GET HEADING */
+router.get("/tutorial/heading", getTutorialHeading);
 
 export default router;

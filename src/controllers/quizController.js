@@ -1,7 +1,7 @@
 // controllers/quizController.js
 import { fetchTutorialById } from "../services/tutorialService.js";
 import { generateQuizFromContent } from "../services/geminiService.js";
-// import { extractHeading } from "../utils/extractHeading.js";
+import { extractHeading } from "../utils/extractHeading.js";
 
 export const generateQuiz = async (req, res, next) => {
   try {
@@ -63,32 +63,32 @@ export const generateQuiz = async (req, res, next) => {
   }
 };
 
-// export const getTutorialHeading = async (req, res, next) => {
-//   try {
-//     const { tutorialId } = req.query;
+export const getTutorialHeading = async (req, res, next) => {
+  try {
+    const { tutorialId } = req.query;
 
-//     if (!tutorialId)
-//       return res.status(400).json({
-//         success: false,
-//         message: "tutorialId is required",
-//       });
+    if (!tutorialId)
+      return res.status(400).json({
+        success: false,
+        message: "tutorialId is required",
+      });
 
-//     const tutorial = await fetchTutorialById(tutorialId);
+    const tutorial = await fetchTutorialById(tutorialId);
 
-//     if (!tutorial)
-//       return res.status(404).json({
-//         success: false,
-//         message: "Tutorial not found",
-//       });
+    if (!tutorial)
+      return res.status(404).json({
+        success: false,
+        message: "Tutorial not found",
+      });
 
-//     const heading = extractHeading(tutorial.content || "");
+    const heading = extractHeading(tutorial.content || "");
 
-//     return res.status(200).json({
-//       success: true,
-//       heading: heading || tutorial.title || `Tutorial ${tutorialId}`,
-//     });
-//   } catch (err) {
-//     console.error("❌ Error in getTutorialHeading:", err.message);
-//     next(err);
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      heading: heading || tutorial.title || `Tutorial ${tutorialId}`,
+    });
+  } catch (err) {
+    console.error("❌ Error in getTutorialHeading:", err.message);
+    next(err);
+  }
+};
