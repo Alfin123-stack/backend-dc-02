@@ -106,14 +106,27 @@ export const clearQuizCache = (req, res) => {
     });
   }
 
-  const clearCache = cache === "true";
-  const clearProgress = progress === "true";
+  // Kata kunci pencarian, fleksibel untuk semua format key
+  const pattern = `${userId}:${tutorialId}:${level}`;
 
-  if (clearCache) quizCache.del(quizKey(userId, tutorialId, level));
-  if (clearProgress) quizCache.del(progressKey(userId, tutorialId, level));
+  // Ambil semua key
+  const allKeys = quizCache.keys();
+
+  // Filter yang cocok
+  const targetKeys = allKeys.filter((key) => key.includes(pattern));
+
+  // Hapus hanya yang sesuai dengan flag cache/progress
+  targetKeys.forEach((key) => {
+    const isQuizCache = key.includes("quiz_cache");
+    const isProgress = key.includes("quiz_progress");
+
+    if (cache === "true" && isQuizCache) quizCache.del(key);
+    if (progress === "true" && isProgress) quizCache.del(key);
+  });
 
   return res.json({
     success: true,
-    message: "Quiz cache/progress berhasil dihapus",
+    message: "Semua cache/progress level ini berhasil dihapus",
+    deleted: targetKeys,
   });
 };
