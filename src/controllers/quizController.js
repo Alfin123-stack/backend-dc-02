@@ -1,55 +1,48 @@
 // controllers/quizController.js
 import { fetchTutorialById } from "../services/tutorialService.js";
 import { generateQuizFromContent } from "../services/geminiService.js";
+import { extractHeading } from "../utils/extractHeading.js";
 
-// ===============================
-// GENERATE QUIZ (NO CACHE)
-// ===============================
 export const generateQuiz = async (req, res, next) => {
   try {
     const { tutorialId, level } = req.body;
 
-    if (!tutorialId) {
-      return res.status(400).json({
-        success: false,
-        message: "tutorialId is required",
-      });
-    }
+    if (!tutorialId)
+      return res
+        .status(400)
+        .json({ success: false, message: "tutorialId is required" });
 
-    if (![1, 2, 3].includes(level)) {
+    if (![1, 2, 3].includes(level))
       return res.status(400).json({
         success: false,
         message: "level must be 1, 2, or 3",
       });
-    }
 
-    // Ambil tutorial langsung dari DB
     const tutorial = await fetchTutorialById(tutorialId);
     const content = tutorial?.content || "";
 
-    if (!content.trim()) {
+    if (!content.trim())
       return res.status(404).json({
         success: false,
         message: "Tutorial content not found.",
       });
-    }
 
     const extractedTitle =
       content.match(/<h2[^>]*>(.*?)<\/h2>/i)?.[1]?.trim() ||
       tutorial.title ||
       `Tutorial ${tutorialId}`;
 
-    // Generate quiz sesuai level
     const quiz = await generateQuizFromContent(content, 3, level);
 
-    if (!Array.isArray(quiz) || quiz.length === 0) {
+    if (!Array.isArray(quiz) || quiz.length === 0)
       return res.status(500).json({
         success: false,
         message: "Failed to generate quiz. AI output invalid.",
       });
-    }
 
-    const responseData = {
+    return res.status(200).json({
+      success: true,
+      message: "Quiz generated successfully",
       tutorial: {
         id: tutorialId,
         title: extractedTitle,
@@ -63,15 +56,39 @@ export const generateQuiz = async (req, res, next) => {
           .length,
       },
       quiz,
-    };
-
-    return res.status(200).json({
-      success: true,
-      message: "Quiz generated successfully",
-      ...responseData,
     });
   } catch (err) {
     console.error("❌ Error in generateQuiz:", err.message);
+    next(err);
+  }
+};
+
+export const getTutorialHeading = async (req, res, next) => {
+  try {
+    const { tutorialId } = req.query;
+
+    if (!tutorialId)
+      return res.status(400).json({
+        success: false,
+        message: "tutorialId is required",
+      });
+
+    const tutorial = await fetchTutorialById(tutorialId);
+
+    if (!tutorial)
+      return res.status(404).json({
+        success: false,
+        message: "Tutorial not found",
+      });
+
+    const heading = extractHeading(tutorial.content || "");
+
+    return res.status(200).json({
+      success: true,
+      heading: heading || tutorial.title || `Tutorial ${tutorialId}`,
+    });
+  } catch (err) {
+    console.error("❌ Error in getTutorialHeading:", err.message);
     next(err);
   }
 };

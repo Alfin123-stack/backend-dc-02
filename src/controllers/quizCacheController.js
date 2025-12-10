@@ -1,10 +1,7 @@
-import express from "express";
-import { generateQuiz } from "../controllers/geminiQuizController.js";
+// controllers/quizCacheController.js
 import quizCache from "../utils/cache.js";
 
-const router = express.Router();
-
-// Helper bikin key rapi (tambahkan level)
+// Helper key
 const quizKey = (userId, tutorialId, level) =>
   `quiz_cache:${userId}:${tutorialId}:${level}`;
 
@@ -12,14 +9,9 @@ const progressKey = (userId, tutorialId, level) =>
   `quiz_progress:${userId}:${tutorialId}:${level}`;
 
 /* ======================================================
-   1. GENERATE QUIZ (menyimpan quiz_cache di NodeCache)
+   SAVE PROGRESS
 =======================================================*/
-router.post("/quiz/generate", generateQuiz);
-
-/* ======================================================
-   2. SAVE PROGRESS (quiz_progress)
-=======================================================*/
-router.post("/quiz/progress", (req, res) => {
+export const saveProgress = (req, res) => {
   const { tutorialId, userId, level, progress } = req.body;
 
   if (!tutorialId || !userId || !level || !progress) {
@@ -35,12 +27,12 @@ router.post("/quiz/progress", (req, res) => {
     success: true,
     message: "Progress saved",
   });
-});
+};
 
 /* ======================================================
-   3. GET PROGRESS (quiz_progress)
+   GET PROGRESS
 =======================================================*/
-router.get("/quiz/progress", (req, res) => {
+export const getProgress = (req, res) => {
   const { tutorialId, userId, level } = req.query;
 
   if (!tutorialId || !userId || !level) {
@@ -56,12 +48,12 @@ router.get("/quiz/progress", (req, res) => {
     success: true,
     progress: progress || null,
   });
-});
+};
 
 /* ======================================================
-   4. GET QUIZ CACHE (soal quiz)
+   GET QUIZ CACHE
 =======================================================*/
-router.get("/quiz/cache", (req, res) => {
+export const getQuizCache = (req, res) => {
   const { tutorialId, userId, level } = req.query;
 
   if (!tutorialId || !userId || !level) {
@@ -77,12 +69,12 @@ router.get("/quiz/cache", (req, res) => {
     success: true,
     quizCache: data || null,
   });
-});
+};
 
 /* ======================================================
-   5. DELETE QUIZ CACHE + PROGRESS
+   DELETE QUIZ CACHE + PROGRESS
 =======================================================*/
-router.delete("/quiz/clear", (req, res) => {
+export const clearQuizCache = (req, res) => {
   const { tutorialId, userId, level } = req.body;
   const { cache = "true", progress = "true" } = req.query;
 
@@ -93,7 +85,6 @@ router.delete("/quiz/clear", (req, res) => {
     });
   }
 
-  // Convert query to boolean
   const clearCache = cache === "true";
   const clearProgress = progress === "true";
 
@@ -104,6 +95,4 @@ router.delete("/quiz/clear", (req, res) => {
     success: true,
     message: "Quiz cache/progress berhasil dihapus",
   });
-});
-
-export default router;
+};
