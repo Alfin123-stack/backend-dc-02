@@ -9,6 +9,27 @@ const progressKey = (userId, tutorialId, level) =>
   `quiz_progress:${userId}:${tutorialId}:${level}`;
 
 /* ======================================================
+   SAVE QUIZ CACHE (NEW)
+=======================================================*/
+export const saveQuizCache = (req, res) => {
+  const { tutorialId, userId, level, quiz } = req.body;
+
+  if (!tutorialId || !userId || !level || !quiz) {
+    return res.status(400).json({
+      success: false,
+      message: "tutorialId, userId, level, dan quiz wajib diisi",
+    });
+  }
+
+  quizCache.set(quizKey(userId, tutorialId, level), quiz);
+
+  return res.json({
+    success: true,
+    message: "Quiz cache saved",
+  });
+};
+
+/* ======================================================
    SAVE PROGRESS
 =======================================================*/
 export const saveProgress = (req, res) => {

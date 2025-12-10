@@ -8,6 +8,7 @@ import {
   getProgress,
   getQuizCache,
   clearQuizCache,
+  saveQuizCache, // ⬅ tambahkan import baru
 } from "../controllers/quizCacheController.js";
 
 const router = express.Router();
@@ -24,10 +25,13 @@ router.get("/quiz/progress", getProgress);
 /* 4. GET QUIZ CACHE */
 router.get("/quiz/cache", getQuizCache);
 
-/* 5. CLEAR CACHE */
+/* 5. SAVE QUIZ CACHE (NEW) */
+router.post("/quiz/cache", saveQuizCache); // ⬅ route baru
+
+/* 6. CLEAR CACHE */
 router.delete("/quiz/clear", clearQuizCache);
 
-/* 6. GET HEADING */
+/* 7. GET HEADING */
 router.get("/tutorial/heading", getTutorialHeading);
 
 export default router;
