@@ -106,22 +106,19 @@ export const clearQuizCache = (req, res) => {
     });
   }
 
-  // Kata kunci pencarian, fleksibel untuk semua format key
+  const clearCache = cache === true || cache === "true";
+  const clearProgress = progress === true || progress === "true";
+
   const pattern = `${userId}:${tutorialId}:${level}`;
-
-  // Ambil semua key
   const allKeys = quizCache.keys();
-
-  // Filter yang cocok
   const targetKeys = allKeys.filter((key) => key.includes(pattern));
 
-  // Hapus hanya yang sesuai dengan flag cache/progress
   targetKeys.forEach((key) => {
     const isQuizCache = key.includes("quiz_cache");
     const isProgress = key.includes("quiz_progress");
 
-    if (cache === "true" && isQuizCache) quizCache.del(key);
-    if (progress === "true" && isProgress) quizCache.del(key);
+    if (clearCache && isQuizCache) quizCache.del(key);
+    if (clearProgress && isProgress) quizCache.del(key);
   });
 
   return res.json({
