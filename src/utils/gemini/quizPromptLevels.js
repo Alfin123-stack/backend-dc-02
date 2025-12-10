@@ -1,8 +1,16 @@
 export const buildQuizPromptLevel1 = (htmlContent, count) => `
-Kamu adalah AI pembuat soal pemula untuk platform edukasi.
+Kamu adalah AI pembuat soal *level dasar* untuk platform edukasi.
 
-Buatkan ${count} soal kuis level dasar berdasarkan materi berikut.  
-Fokus pada pemahaman umum dan konsep paling dasar.
+Tugas kamu adalah membuat ${count} soal kuis yang **benar-benar variatif**, bukan mengulang pola yang sama.  
+Setiap soal harus fokus pada konsep paling dasar, namun **harus berbeda satu sama lain**, baik dari sisi:
+
+- cara bertanya  
+- sudut pandang kalimat  
+- konteks sederhana yang diberikan  
+- fokus konsep yang diuji  
+
+Meskipun sederhana, **hindari soal yang serupa secara struktur**.  
+Kembangkan sudut pandang berbeda: definisi, fungsi, contoh, tujuan, manfaat, atau identifikasi elemen penting dari materi.
 
 === MATERI DIMULAI ===
 ${htmlContent}
@@ -48,10 +56,21 @@ OUTPUT HARUS JSON ARRAY VALID
 `;
 
 export const buildQuizPromptLevel2 = (htmlContent, count) => `
-Kamu adalah AI pembuat soal menengah untuk platform edukasi.
+Kamu adalah AI pembuat soal *level menengah* untuk platform edukasi.
 
-Buatkan ${count} soal kuis level menengah berdasarkan materi berikut.  
-Fokus pada pemahaman konsep, penerapan, dan analisis ringan.
+Buat ${count} soal kuis yang **beragam** dan tidak boleh memiliki pola serupa.  
+Setiap soal harus menuntut kemampuan berpikir menengah: pemahaman, alasan, interpretasi, dan hubungan antar konsep.
+
+Untuk menghasilkan soal yang tidak monoton, gunakan variasi:
+- perbandingan antar konsep  
+- menemukan alasan atau penyebab  
+- memilih contoh yang tepat  
+- menemukan kesalahan konsep  
+- interpretasi ilustrasi atau situasi sederhana  
+- membaca makna dari penjelasan  
+
+Selain itu, **hindari mengulang format pertanyaan yang sama**, meskipun isinya berbeda.  
+Pastikan setiap soal memiliki pendekatan unik.
 
 === MATERI DIMULAI ===
 ${htmlContent}
@@ -97,10 +116,20 @@ OUTPUT HARUS JSON ARRAY VALID
 `;
 
 export const buildQuizPromptLevel3 = (htmlContent, count) => `
-Kamu adalah AI pembuat soal tingkat lanjut untuk platform edukasi profesional.
+Kamu adalah AI pembuat soal *tingkat lanjut* untuk platform edukasi profesional.
 
-Buatkan ${count} soal kuis level lanjutan berdasarkan materi berikut.  
-Fokus pada analisis mendalam, evaluasi, penerapan kompleks, dan critical thinking.
+Tugas kamu adalah membuat ${count} soal yang **benar-benar kompleks, unik, dan tidak repetitif**.  
+Gunakan sudut pandang yang berbeda untuk tiap soal, seperti:
+
+- analisis mendalam dari skenario nyata  
+- studi kasus dengan konteks yang bervariasi  
+- perbandingan dua pendekatan  
+- penerapan konsep pada situasi baru yang tidak eksplisit di materi  
+- identifikasi kesalahan logika  
+- evaluasi keputusan atau solusi  
+
+Hindari pertanyaan yang strukturalnya sama.  
+Setiap soal harus terasa seperti tantangan baru bagi pelajar tingkat lanjut.
 
 === MATERI DIMULAI ===
 ${htmlContent}
