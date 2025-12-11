@@ -8,8 +8,16 @@ const quizKey = (userId, tutorialId, level) =>
 const progressKey = (userId, tutorialId, level) =>
   `quiz_progress:${userId}:${tutorialId}:${level}`;
 
+// Helper convert bool
+const toBool = (v) => {
+  if (v === true) return true;
+  if (v === "true") return true;
+  if (v === 1 || v === "1") return true;
+  return false;
+};
+
 /* ======================================================
-   SAVE QUIZ CACHE (NEW)
+   SAVE QUIZ CACHE
 =======================================================*/
 export const saveQuizCache = (req, res) => {
   const { tutorialId, userId, level, quiz } = req.body;
@@ -93,11 +101,17 @@ export const getQuizCache = (req, res) => {
 };
 
 /* ======================================================
-   DELETE QUIZ CACHE + PROGRESS
+   DELETE QUIZ CACHE + PROGRESS (FINAL FIX)
 =======================================================*/
 export const clearQuizCache = (req, res) => {
-  const { tutorialId, userId, level } = req.body;
-  const { cache = "true", progress = "true" } = req.query;
+  // DELETE body tidak reliable → pakai query semua
+  const {
+    tutorialId,
+    userId,
+    level,
+    cache = "true",
+    progress = "true",
+  } = req.query;
 
   if (!tutorialId || !userId || !level) {
     return res.status(400).json({
@@ -106,19 +120,22 @@ export const clearQuizCache = (req, res) => {
     });
   }
 
-  const clearCache = cache === true || cache === "true";
-  const clearProgress = progress === true || progress === "true";
+  const clearCache = toBool(cache);
+  const clearProgress = toBool(progress);
 
+  // Pattern key
   const pattern = `${userId}:${tutorialId}:${level}`;
+
   const allKeys = quizCache.keys();
   const targetKeys = allKeys.filter((key) => key.includes(pattern));
 
   targetKeys.forEach((key) => {
-    const isQuizCache = key.includes("quiz_cache");
-    const isProgress = key.includes("quiz_progress");
-
-    if (clearCache && isQuizCache) quizCache.del(key);
-    if (clearProgress && isProgress) quizCache.del(key);
+    if (clearCache && key.includes("quiz_cache")) {
+      quizCache.del(key);
+    }
+    if (clearProgress && key.includes("quiz_progress")) {
+      quizCache.del(key);
+    }
   });
 
   return res.json({
