@@ -10,6 +10,7 @@ import {
   clearQuizCache,
   saveQuizCache, // ⬅ tambahkan import baru
 } from "../controllers/quizCacheController.js";
+import quizCache from "../utils/cache.js";
 
 const router = express.Router();
 
@@ -33,5 +34,17 @@ router.delete("/quiz/clear", clearQuizCache);
 
 /* 7. GET HEADING */
 router.get("/tutorial/heading", getTutorialHeading);
+
+router.get("/debug/cache", (req, res) => {
+  const keys = quizCache.keys();
+
+  res.json({
+    total: keys.length,
+    entries: keys.map((key) => ({
+      key,
+      value: quizCache.get(key),
+    })),
+  });
+});
 
 export default router;
