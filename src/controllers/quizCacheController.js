@@ -104,7 +104,6 @@ export const getQuizCache = (req, res) => {
    DELETE QUIZ CACHE + PROGRESS (FINAL FIX)
 =======================================================*/
 export const clearQuizCache = (req, res) => {
-  // DELETE body tidak reliable → pakai query semua
   const {
     tutorialId,
     userId,
@@ -123,24 +122,25 @@ export const clearQuizCache = (req, res) => {
   const clearCache = toBool(cache);
   const clearProgress = toBool(progress);
 
-  // Pattern key
-  const pattern = `${userId}:${tutorialId}:${level}`;
+  // EXACT KEY
+  const qKey = quizKey(userId, tutorialId, level);
+  const pKey = progressKey(userId, tutorialId, level);
 
-  const allKeys = quizCache.keys();
-  const targetKeys = allKeys.filter((key) => key.includes(pattern));
+  const deleted = [];
 
-  targetKeys.forEach((key) => {
-    if (clearCache && key.includes("quiz_cache")) {
-      quizCache.del(key);
-    }
-    if (clearProgress && key.includes("quiz_progress")) {
-      quizCache.del(key);
-    }
-  });
+  if (clearCache && quizCache.has(qKey)) {
+    quizCache.del(qKey);
+    deleted.push(qKey);
+  }
+
+  if (clearProgress && quizCache.has(pKey)) {
+    quizCache.del(pKey);
+    deleted.push(pKey);
+  }
 
   return res.json({
     success: true,
-    message: "Semua cache/progress level ini berhasil dihapus",
-    deleted: targetKeys,
+    message: "Cache & progress berhasil dihapus",
+    deleted,
   });
 };
