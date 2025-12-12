@@ -10,6 +10,12 @@ import {
   clearQuizCache,
   saveQuizCache, // ⬅ tambahkan import baru
 } from "../controllers/quizCacheController.js";
+
+import {
+  getHistory,
+  saveHistory,
+  clearHistory,
+} from "../controllers/historyController.js";
 import quizCache from "../utils/cache.js";
 
 const router = express.Router();
@@ -34,6 +40,15 @@ router.delete("/quiz/clear", clearQuizCache);
 
 /* 7. GET HEADING */
 router.get("/tutorial/heading", getTutorialHeading);
+
+/* 8. GET HISTORY */
+router.get("/quiz/history", getHistory);
+
+/* 9. SAVE HISTORY */
+router.post("/quiz/history", saveHistory);
+
+/* 11. CLEAR ALL HISTORY */
+router.delete("/quiz/history/clear", clearHistory);
 
 router.get("/debug/cache", (req, res) => {
   const keys = quizCache.keys();
