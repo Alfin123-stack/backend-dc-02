@@ -1,7 +1,5 @@
-// middlewares/errorHandler.js
-
 export default function errorHandler(err, req, res) {
-  console.error("🔥 ERROR:", err);
+  console.error("ERROR:", err);
 
   const status = err.status || 500;
   const message = err.message || "An unexpected server error occurred.";

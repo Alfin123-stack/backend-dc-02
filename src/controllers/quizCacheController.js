@@ -1,24 +1,6 @@
-// controllers/quizCacheController.js
 import quizCache from "../utils/cache.js";
+import { progressKey, quizKey, toBool } from "../utils/helper.js";
 
-// Helper key
-const quizKey = (userId, tutorialId, level) =>
-  `quiz_cache:${userId}:${tutorialId}:${level}`;
-
-const progressKey = (userId, tutorialId, level) =>
-  `quiz_progress:${userId}:${tutorialId}:${level}`;
-
-// Helper convert bool
-const toBool = (v) => {
-  if (v === true) return true;
-  if (v === "true") return true;
-  if (v === 1 || v === "1") return true;
-  return false;
-};
-
-/* ======================================================
-   SAVE QUIZ CACHE
-=======================================================*/
 export const saveQuizCache = (req, res) => {
   const { tutorialId, userId, level, quiz } = req.body;
 
@@ -37,9 +19,6 @@ export const saveQuizCache = (req, res) => {
   });
 };
 
-/* ======================================================
-   SAVE PROGRESS
-=======================================================*/
 export const saveProgress = (req, res) => {
   const { tutorialId, userId, level, progress } = req.body;
 
@@ -58,9 +37,6 @@ export const saveProgress = (req, res) => {
   });
 };
 
-/* ======================================================
-   GET PROGRESS
-=======================================================*/
 export const getProgress = (req, res) => {
   const { tutorialId, userId, level } = req.query;
 
@@ -79,9 +55,6 @@ export const getProgress = (req, res) => {
   });
 };
 
-/* ======================================================
-   GET QUIZ CACHE
-=======================================================*/
 export const getQuizCache = (req, res) => {
   const { tutorialId, userId, level } = req.query;
 
@@ -100,9 +73,6 @@ export const getQuizCache = (req, res) => {
   });
 };
 
-/* ======================================================
-   DELETE QUIZ CACHE + PROGRESS (FINAL FIX)
-=======================================================*/
 export const clearQuizCache = (req, res) => {
   const {
     tutorialId,
@@ -144,5 +114,3 @@ export const clearQuizCache = (req, res) => {
     deleted,
   });
 };
-
-

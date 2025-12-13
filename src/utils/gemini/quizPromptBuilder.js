@@ -13,6 +13,6 @@ export const buildQuizPrompt = (htmlContent, count, level) => {
     case 3:
       return buildQuizPromptLevel3(htmlContent, count);
     default:
-      return buildQuizPromptLevel1(htmlContent, count); // fallback
+      return buildQuizPromptLevel1(htmlContent, count);
   }
 };

@@ -1,7 +1,6 @@
-// controllers/quizController.js
 import { fetchTutorialById } from "../services/tutorialService.js";
 import { generateQuizFromContent } from "../services/geminiService.js";
-import { extractHeading } from "../utils/extractHeading.js";
+import { extractHeading } from "../utils/helper.js";
 
 export const generateQuiz = async (req, res, next) => {
   try {
@@ -58,7 +57,7 @@ export const generateQuiz = async (req, res, next) => {
       quiz,
     });
   } catch (err) {
-    console.error("❌ Error in generateQuiz:", err.message);
+    console.error("Error in generateQuiz:", err.message);
     next(err);
   }
 };
@@ -88,7 +87,7 @@ export const getTutorialHeading = async (req, res, next) => {
       heading: heading || tutorial.title || `Tutorial ${tutorialId}`,
     });
   } catch (err) {
-    console.error("❌ Error in getTutorialHeading:", err.message);
+    console.error("Error in getTutorialHeading:", err.message);
     next(err);
   }
 };

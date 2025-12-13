@@ -8,46 +8,57 @@ import {
   getProgress,
   getQuizCache,
   clearQuizCache,
-  saveQuizCache, // ⬅ tambahkan import baru
+  saveQuizCache,
 } from "../controllers/quizCacheController.js";
 
 import {
   getHistory,
   saveHistory,
   clearHistory,
-} from "../controllers/historyController.js";
+} from "../controllers/quizHistoryController.js";
 import quizCache from "../utils/cache.js";
+import { validateBody, validateQuery } from "../middlewares/validate.js";
+import {
+  generateQuizSchema,
+  getTutorialHeadingSchema,
+} from "../validators/quizValidator.js";
+import {
+  clearQuizCacheSchema,
+  getProgressSchema,
+  getQuizCacheSchema,
+  saveProgressSchema,
+  saveQuizCacheSchema,
+} from "../validators/quizCacheValidator.js";
+import { saveHistorySchema } from "../validators/quizHistoryValidator.js";
 
 const router = express.Router();
 
-/* 1. GENERATE QUIZ */
-router.post("/quiz/generate", generateQuiz);
+router.post("/quiz/generate", validateBody(generateQuizSchema, generateQuiz));
 
-/* 2. SAVE PROGRESS */
-router.post("/quiz/progress", saveProgress);
+router.get(
+  "/tutorial/heading",
+  validateQuery(getTutorialHeadingSchema),
+  getTutorialHeading
+);
 
-/* 3. GET PROGRESS */
-router.get("/quiz/progress", getProgress);
+router.post("/quiz/progress", validateBody(saveProgressSchema), saveProgress);
 
-/* 4. GET QUIZ CACHE */
-router.get("/quiz/cache", getQuizCache);
+router.get("/quiz/progress", validateQuery(getProgressSchema), getProgress);
 
-/* 5. SAVE QUIZ CACHE (NEW) */
-router.post("/quiz/cache", saveQuizCache); // ⬅ route baru
+router.get("/quiz/cache", validateQuery(getQuizCacheSchema), getQuizCache);
 
-/* 6. CLEAR CACHE */
-router.delete("/quiz/clear", clearQuizCache);
+router.post("/quiz/cache", validateBody(saveQuizCacheSchema), saveQuizCache);
 
-/* 7. GET HEADING */
-router.get("/tutorial/heading", getTutorialHeading);
+router.delete(
+  "/quiz/clear",
+  validateQuery(clearQuizCacheSchema),
+  clearQuizCache
+);
 
-/* 8. GET HISTORY */
 router.get("/quiz/history", getHistory);
 
-/* 9. SAVE HISTORY */
-router.post("/quiz/history", saveHistory);
+router.post("/quiz/history", validateBody(saveHistorySchema), saveHistory);
 
-/* 11. CLEAR ALL HISTORY */
 router.delete("/quiz/history/clear", clearHistory);
 
 router.get("/debug/cache", (req, res) => {

@@ -1,5 +1,3 @@
-// services/userPreferencesService.js
-
 import axios from "axios";
 import dotenv from "dotenv";
 
@@ -11,19 +9,11 @@ if (!BASE_URL) {
   throw new Error("Missing required environment variable: EXTERNAL_API_BASE");
 }
 
-/**
- * Axios instance for external API calls
- */
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
 });
 
-/**
- * ============================================================
- * 🔧 Format Axios Errors to Standard Error Object
- * ============================================================
- */
 const formatAxiosError = (error, defaultMessage) => {
   if (error.response) {
     const status = error.response.status;
@@ -46,13 +36,6 @@ const formatAxiosError = (error, defaultMessage) => {
   return err;
 };
 
-/**
- * ============================================================
- * 📘 Fetch User Preferences
- * ============================================================
- * @param {string|number} userId - User ID
- * @returns {Promise<Object|null>}
- */
 export const fetchUserPreferences = async (userId) => {
   try {
     if (!userId) {
@@ -60,7 +43,6 @@ export const fetchUserPreferences = async (userId) => {
     }
 
     const response = await api.get(`/api/users/${userId}/preferences`);
-
     return response.data?.data || null;
   } catch (error) {
     throw formatAxiosError(error, "Failed to fetch user preferences");
