@@ -1,5 +1,5 @@
-import { fetchTutorialById } from "../services/tutorialService.js";
 import { generateQuizFromContent } from "../services/geminiService.js";
+import { fetchTutorialById } from "../services/tutorialService.js";
 import { extractHeading } from "../utils/helper.js";
 
 export const generateQuiz = async (req, res, next) => {
