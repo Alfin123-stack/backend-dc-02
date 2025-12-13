@@ -33,7 +33,7 @@ import { saveHistorySchema } from "../validators/quizHistoryValidator.js";
 
 const router = express.Router();
 
-router.post("/quiz/generate", validateBody(generateQuizSchema, generateQuiz));
+router.post("/quiz/generate", validateBody(generateQuizSchema), generateQuiz);
 
 router.get(
   "/tutorial/heading",
