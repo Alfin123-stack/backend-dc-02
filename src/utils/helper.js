@@ -22,3 +22,15 @@ export const toBool = (v) => {
   if (v === 1 || v === "1") return true;
   return false;
 };
+
+export const parseIds = (tutorialId, userId, level) => {
+  const tID = Number(tutorialId);
+  const uID = Number(userId);
+  const lvl = Number(level);
+
+  if ([tID, uID, lvl].some(Number.isNaN)) {
+    return null;
+  }
+
+  return { tID, uID, lvl };
+};

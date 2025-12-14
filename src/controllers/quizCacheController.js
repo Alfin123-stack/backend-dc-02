@@ -1,17 +1,23 @@
-import quizCache from "../utils/cache.js";
-import { progressKey, quizKey, toBool } from "../utils/helper.js";
+import { kv } from "@vercel/kv";
+import { parseIds, progressKey, quizKey, toBool } from "../utils/helper.js";
 
-export const saveQuizCache = (req, res) => {
-  const { tutorialId, userId, level, quiz } = req.body;
+/* ===============================
+   SAVE QUIZ CACHE
+=============================== */
+export const saveQuizCache = async (req, res) => {
+  const parsed = parseIds(req.body.tutorialId, req.body.userId, req.body.level);
 
-  if (!tutorialId || !userId || !level || !quiz) {
+  if (!parsed || !req.body.quiz) {
     return res.status(400).json({
       success: false,
       message: "tutorialId, userId, level, dan quiz wajib diisi",
     });
   }
 
-  quizCache.set(quizKey(userId, tutorialId, level), quiz);
+  const { tID, uID, lvl } = parsed;
+  const key = quizKey(uID, tID, lvl);
+
+  await kv.set(key, req.body.quiz);
 
   return res.json({
     success: true,
@@ -19,17 +25,23 @@ export const saveQuizCache = (req, res) => {
   });
 };
 
-export const saveProgress = (req, res) => {
-  const { tutorialId, userId, level, progress } = req.body;
+/* ===============================
+   SAVE PROGRESS
+=============================== */
+export const saveProgress = async (req, res) => {
+  const parsed = parseIds(req.body.tutorialId, req.body.userId, req.body.level);
 
-  if (!tutorialId || !userId || !level || !progress) {
+  if (!parsed || !req.body.progress) {
     return res.status(400).json({
       success: false,
       message: "tutorialId, userId, level, dan progress wajib diisi",
     });
   }
 
-  quizCache.set(progressKey(userId, tutorialId, level), progress);
+  const { tID, uID, lvl } = parsed;
+  const key = progressKey(uID, tID, lvl);
+
+  await kv.set(key, req.body.progress);
 
   return res.json({
     success: true,
@@ -37,17 +49,27 @@ export const saveProgress = (req, res) => {
   });
 };
 
-export const getProgress = (req, res) => {
-  const { tutorialId, userId, level } = req.query;
+/* ===============================
+   GET PROGRESS
+=============================== */
+export const getProgress = async (req, res) => {
+  const parsed = parseIds(
+    req.query.tutorialId,
+    req.query.userId,
+    req.query.level
+  );
 
-  if (!tutorialId || !userId || !level) {
+  if (!parsed) {
     return res.status(400).json({
       success: false,
       message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  const progress = quizCache.get(progressKey(userId, tutorialId, level));
+  const { tID, uID, lvl } = parsed;
+  const key = progressKey(uID, tID, lvl);
+
+  const progress = await kv.get(key);
 
   return res.json({
     success: true,
@@ -55,17 +77,27 @@ export const getProgress = (req, res) => {
   });
 };
 
-export const getQuizCache = (req, res) => {
-  const { tutorialId, userId, level } = req.query;
+/* ===============================
+   GET QUIZ CACHE
+=============================== */
+export const getQuizCache = async (req, res) => {
+  const parsed = parseIds(
+    req.query.tutorialId,
+    req.query.userId,
+    req.query.level
+  );
 
-  if (!tutorialId || !userId || !level) {
+  if (!parsed) {
     return res.status(400).json({
       success: false,
       message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  const data = quizCache.get(quizKey(userId, tutorialId, level));
+  const { tID, uID, lvl } = parsed;
+  const key = quizKey(uID, tID, lvl);
+
+  const data = await kv.get(key);
 
   return res.json({
     success: true,
@@ -73,38 +105,39 @@ export const getQuizCache = (req, res) => {
   });
 };
 
-export const clearQuizCache = (req, res) => {
-  const {
-    tutorialId,
-    userId,
-    level,
-    cache = "true",
-    progress = "true",
-  } = req.query;
+/* ===============================
+   CLEAR QUIZ CACHE & PROGRESS
+=============================== */
+export const clearQuizCache = async (req, res) => {
+  const parsed = parseIds(
+    req.query.tutorialId,
+    req.query.userId,
+    req.query.level
+  );
 
-  if (!tutorialId || !userId || !level) {
+  if (!parsed) {
     return res.status(400).json({
       success: false,
       message: "tutorialId, userId, dan level wajib",
     });
   }
 
-  const clearCache = toBool(cache);
-  const clearProgress = toBool(progress);
+  const { tID, uID, lvl } = parsed;
 
-  // EXACT KEY
-  const qKey = quizKey(userId, tutorialId, level);
-  const pKey = progressKey(userId, tutorialId, level);
+  const clearCache = toBool(req.query.cache ?? "true");
+  const clearProgress = toBool(req.query.progress ?? "true");
 
   const deleted = [];
 
-  if (clearCache && quizCache.has(qKey)) {
-    quizCache.del(qKey);
+  if (clearCache) {
+    const qKey = quizKey(uID, tID, lvl);
+    await kv.del(qKey);
     deleted.push(qKey);
   }
 
-  if (clearProgress && quizCache.has(pKey)) {
-    quizCache.del(pKey);
+  if (clearProgress) {
+    const pKey = progressKey(uID, tID, lvl);
+    await kv.del(pKey);
     deleted.push(pKey);
   }
 
