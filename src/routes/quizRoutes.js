@@ -58,7 +58,7 @@ router.delete(
 
 router.get("/quiz/history", getHistory);
 
-router.post("/quiz/history", validateBody(saveHistorySchema), saveHistory);
+router.post("/quiz/history", saveHistory);
 
 router.delete("/quiz/history/clear", clearHistory);
 

@@ -1,27 +1,33 @@
-import quizCache from "../utils/cache.js";
+import { redis } from "../utils/redis.js";
 
 const HISTORY_KEY = "quiz_history";
 
-export const getHistory = (req, res) => {
-  const list = quizCache.get(HISTORY_KEY) || [];
+/* ===============================
+   GET HISTORY
+=============================== */
+export const getHistory = async (req, res) => {
+  const list = await redis.get(HISTORY_KEY);
 
   return res.json({
     success: true,
-    history: list,
+    history: list || [],
   });
 };
 
-export const saveHistory = (req, res) => {
+/* ===============================
+   SAVE HISTORY
+=============================== */
+export const saveHistory = async (req, res) => {
   const entry = {
     ...req.body,
     createdAt: req.body.createdAt || new Date().toISOString(),
   };
 
-  const list = quizCache.get(HISTORY_KEY) || [];
+  const list = (await redis.get(HISTORY_KEY)) || [];
 
   list.unshift(entry);
 
-  quizCache.set(HISTORY_KEY, list);
+  await redis.set(HISTORY_KEY, list);
 
   return res.json({
     success: true,
@@ -30,8 +36,11 @@ export const saveHistory = (req, res) => {
   });
 };
 
-export const clearHistory = (req, res) => {
-  quizCache.del(HISTORY_KEY);
+/* ===============================
+   CLEAR HISTORY
+=============================== */
+export const clearHistory = async (req, res) => {
+  await redis.del(HISTORY_KEY);
 
   return res.json({
     success: true,
