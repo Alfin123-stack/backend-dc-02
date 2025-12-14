@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { redis } from "../utils/redis.js";
 import { parseIds, progressKey, quizKey, toBool } from "../utils/helper.js";
 
 /* ===============================
@@ -17,7 +17,7 @@ export const saveQuizCache = async (req, res) => {
   const { tID, uID, lvl } = parsed;
   const key = quizKey(uID, tID, lvl);
 
-  await kv.set(key, req.body.quiz);
+  await redis.set(key, req.body.quiz);
 
   return res.json({
     success: true,
@@ -41,7 +41,7 @@ export const saveProgress = async (req, res) => {
   const { tID, uID, lvl } = parsed;
   const key = progressKey(uID, tID, lvl);
 
-  await kv.set(key, req.body.progress);
+  await redis.set(key, req.body.progress);
 
   return res.json({
     success: true,
@@ -69,11 +69,11 @@ export const getProgress = async (req, res) => {
   const { tID, uID, lvl } = parsed;
   const key = progressKey(uID, tID, lvl);
 
-  const progress = await kv.get(key);
+  const progress = await redis.get(key);
 
   return res.json({
     success: true,
-    progress: progress || null,
+    progress: progress ?? null,
   });
 };
 
@@ -97,11 +97,11 @@ export const getQuizCache = async (req, res) => {
   const { tID, uID, lvl } = parsed;
   const key = quizKey(uID, tID, lvl);
 
-  const data = await kv.get(key);
+  const data = await redis.get(key);
 
   return res.json({
     success: true,
-    quizCache: data || null,
+    quizCache: data ?? null,
   });
 };
 
@@ -131,13 +131,13 @@ export const clearQuizCache = async (req, res) => {
 
   if (clearCache) {
     const qKey = quizKey(uID, tID, lvl);
-    await kv.del(qKey);
+    await redis.del(qKey);
     deleted.push(qKey);
   }
 
   if (clearProgress) {
     const pKey = progressKey(uID, tID, lvl);
-    await kv.del(pKey);
+    await redis.del(pKey);
     deleted.push(pKey);
   }
 

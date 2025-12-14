@@ -62,21 +62,25 @@ router.post("/quiz/history", validateBody(saveHistorySchema), saveHistory);
 
 router.delete("/quiz/history/clear", clearHistory);
 
+import { redis } from "../utils/redis.js";
+
 router.get("/debug/cache", async (req, res) => {
   try {
     const entries = [];
     let cursor = 0;
 
     do {
-      const [nextCursor, keys] = await kv.scan(cursor, {
-        match: "*", // bisa dipersempit: "quiz:*" atau "progress:*"
+      // SCAN redis
+      const result = await redis.scan(cursor, {
+        match: "*", // bisa ganti: "quiz:*" atau "progress:*"
         count: 50,
       });
 
-      cursor = nextCursor;
+      // Upstash return format: { cursor, keys }
+      cursor = Number(result.cursor);
 
-      for (const key of keys) {
-        const value = await kv.get(key);
+      for (const key of result.keys) {
+        const value = await redis.get(key);
         entries.push({ key, value });
       }
     } while (cursor !== 0);
@@ -87,6 +91,7 @@ router.get("/debug/cache", async (req, res) => {
       entries,
     });
   } catch (err) {
+    console.error("DEBUG REDIS ERROR:", err);
     res.status(500).json({
       success: false,
       message: err.message,
