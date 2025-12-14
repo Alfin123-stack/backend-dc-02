@@ -17,7 +17,6 @@ import {
   clearHistory,
 } from "../controllers/quizHistoryController.js";
 
-import { kv } from "@vercel/kv";
 import { validateBody, validateQuery } from "../middlewares/validate.js";
 import {
   generateQuizSchema,
@@ -26,11 +25,8 @@ import {
 import {
   clearQuizCacheSchema,
   getProgressSchema,
-  getQuizCacheSchema,
   saveProgressSchema,
-  saveQuizCacheSchema,
 } from "../validators/quizCacheValidator.js";
-import { saveHistorySchema } from "../validators/quizHistoryValidator.js";
 
 const router = express.Router();
 
@@ -61,42 +57,5 @@ router.get("/quiz/history", getHistory);
 router.post("/quiz/history", saveHistory);
 
 router.delete("/quiz/history/clear", clearHistory);
-
-import { redis } from "../utils/redis.js";
-
-router.get("/debug/cache", async (req, res) => {
-  try {
-    const entries = [];
-    let cursor = 0;
-
-    do {
-      // SCAN redis
-      const result = await redis.scan(cursor, {
-        match: "*", // bisa ganti: "quiz:*" atau "progress:*"
-        count: 50,
-      });
-
-      // Upstash return format: { cursor, keys }
-      cursor = Number(result.cursor);
-
-      for (const key of result.keys) {
-        const value = await redis.get(key);
-        entries.push({ key, value });
-      }
-    } while (cursor !== 0);
-
-    res.json({
-      success: true,
-      total: entries.length,
-      entries,
-    });
-  } catch (err) {
-    console.error("DEBUG REDIS ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-});
 
 export default router;

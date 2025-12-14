@@ -14,15 +14,12 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@upstash/redis": "^1.35.8",
-    "@vercel/kv": "^3.0.0",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "helmet": "^7.2.0",
     "joi": "^18.0.2",
-    "jsonwebtoken": "^9.0.2",
-    "node-cache": "^5.1.2",
     "serverless-http": "^4.0.0",
     "swagger": "^0.7.5",
     "swagger-ui-express": "^5.0.1"
