@@ -45,9 +45,9 @@ router.post("/quiz/progress", validateBody(saveProgressSchema), saveProgress);
 
 router.get("/quiz/progress", validateQuery(getProgressSchema), getProgress);
 
-router.get("/quiz/cache", validateQuery(getQuizCacheSchema), getQuizCache);
+router.get("/quiz/cache", getQuizCache);
 
-router.post("/quiz/cache", validateBody(saveQuizCacheSchema), saveQuizCache);
+router.post("/quiz/cache", saveQuizCache);
 
 router.delete(
   "/quiz/clear",
