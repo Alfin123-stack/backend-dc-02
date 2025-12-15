@@ -3,35 +3,73 @@
   "info": {
     "title": "Quiz Backend API",
     "version": "1.0.0",
-    "description": "API for quiz generation, cache, progress, and history management"
+    "description": "API for quiz generation, cache, progress, history, tutorial utilities, and user preferences"
   },
   "servers": [
     {
-      "url": "https://backend-dc-02.vercel.app/api"
+      "url": "https://backend-dc-02.vercel.app/api",
+      "description": "Production server"
     }
   ],
   "tags": [
-    { "name": "Quiz" },
-    { "name": "Progress" },
-    { "name": "Cache" },
-    { "name": "History" },
-    { "name": "Tutorial" },
-    { "name": "Debug" }
+    { "name": "Users", "description": "User preferences" },
+    { "name": "Quiz", "description": "Quiz generation" },
+    { "name": "Tutorial", "description": "Tutorial utilities" },
+    { "name": "Progress", "description": "Quiz progress handling" },
+    { "name": "Cache", "description": "Quiz cache handling" },
+    { "name": "History", "description": "Quiz history management" }
   ],
+
   "paths": {
+    "/users/{id}/preferences": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user preferences",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "user_1" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preferences retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "preferences": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "/quiz/generate": {
       "post": {
         "tags": ["Quiz"],
-        "summary": "Generate quiz from tutorial",
+        "summary": "Generate quiz from tutorial content",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["tutorialId"],
+                "required": ["tutorialId", "level"],
                 "properties": {
-                  "tutorialId": { "type": "integer" }
+                  "tutorialId": { "type": "string", "example": "tutorial_1" },
+                  "level": {
+                    "type": "integer",
+                    "enum": [1, 2, 3],
+                    "example": 2
+                  }
                 }
               }
             }
@@ -43,16 +81,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "quiz": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/QuizQuestion"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/GenerateQuizResponse"
                 }
               }
             }
@@ -70,7 +99,7 @@
             "name": "tutorialId",
             "in": "query",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": { "type": "string", "example": "tutorial_1" }
           }
         ],
         "responses": {
@@ -81,8 +110,8 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "heading": { "type": "string" }
+                    "success": { "type": "boolean", "example": true },
+                    "heading": { "type": "string", "example": "Intro to JS" }
                   }
                 }
               }
@@ -100,23 +129,21 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveProgressRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/SaveProgressRequest" }
             }
           }
         },
         "responses": {
-          "200": { "$ref": "#/components/responses/SuccessMessage" }
+          "200": { "$ref": "#/components/responses/BasicSuccess" }
         }
       },
       "get": {
         "tags": ["Progress"],
         "summary": "Get quiz progress",
         "parameters": [
-          { "$ref": "#/components/parameters/tutorialId" },
-          { "$ref": "#/components/parameters/userId" },
-          { "$ref": "#/components/parameters/level" }
+          { "$ref": "#/components/parameters/TutorialId" },
+          { "$ref": "#/components/parameters/UserId" },
+          { "$ref": "#/components/parameters/Level" }
         ],
         "responses": {
           "200": {
@@ -126,7 +153,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
+                    "success": { "type": "boolean", "example": true },
                     "progress": { "type": "object", "nullable": true }
                   }
                 }
@@ -142,9 +169,9 @@
         "tags": ["Cache"],
         "summary": "Get quiz cache",
         "parameters": [
-          { "$ref": "#/components/parameters/tutorialId" },
-          { "$ref": "#/components/parameters/userId" },
-          { "$ref": "#/components/parameters/level" }
+          { "$ref": "#/components/parameters/TutorialId" },
+          { "$ref": "#/components/parameters/UserId" },
+          { "$ref": "#/components/parameters/Level" }
         ],
         "responses": {
           "200": {
@@ -154,12 +181,8 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "quizCache": {
-                      "type": "array",
-                      "items": { "$ref": "#/components/schemas/QuizQuestion" },
-                      "nullable": true
-                    }
+                    "success": { "type": "boolean", "example": true },
+                    "quizCache": { "type": "array", "nullable": true }
                   }
                 }
               }
@@ -174,14 +197,12 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveQuizCacheRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/SaveQuizCacheRequest" }
             }
           }
         },
         "responses": {
-          "200": { "$ref": "#/components/responses/SuccessMessage" }
+          "200": { "$ref": "#/components/responses/BasicSuccess" }
         }
       }
     },
@@ -189,11 +210,11 @@
     "/quiz/clear": {
       "delete": {
         "tags": ["Cache"],
-        "summary": "Clear quiz cache & progress",
+        "summary": "Clear quiz cache and/or progress",
         "parameters": [
-          { "$ref": "#/components/parameters/tutorialId" },
-          { "$ref": "#/components/parameters/userId" },
-          { "$ref": "#/components/parameters/level" },
+          { "$ref": "#/components/parameters/TutorialId" },
+          { "$ref": "#/components/parameters/UserId" },
+          { "$ref": "#/components/parameters/Level" },
           {
             "name": "cache",
             "in": "query",
@@ -213,7 +234,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
+                    "success": { "type": "boolean", "example": true },
                     "deleted": {
                       "type": "array",
                       "items": { "type": "string" }
@@ -236,16 +257,7 @@
             "description": "History retrieved",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "history": {
-                      "type": "array",
-                      "items": { "type": "object" }
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/GetHistoryResponse" }
               }
             }
           }
@@ -258,12 +270,12 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object" }
+              "schema": { "$ref": "#/components/schemas/SaveHistoryRequest" }
             }
           }
         },
         "responses": {
-          "200": { "$ref": "#/components/responses/SuccessMessage" }
+          "200": { "$ref": "#/components/schemas/SaveHistoryResponse" }
         }
       }
     },
@@ -271,41 +283,9 @@
     "/quiz/history/clear": {
       "delete": {
         "tags": ["History"],
-        "summary": "Clear all quiz history",
+        "summary": "Clear quiz history",
         "responses": {
-          "200": { "$ref": "#/components/responses/SuccessMessage" }
-        }
-      }
-    },
-
-    "/debug/cache": {
-      "get": {
-        "tags": ["Debug"],
-        "summary": "Inspect cache (debug only)",
-        "responses": {
-          "200": {
-            "description": "Cache dump",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": { "type": "integer" },
-                    "entries": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": { "type": "string" },
-                          "value": {}
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "200": { "$ref": "#/components/responses/BasicSuccess" }
         }
       }
     }
@@ -313,57 +293,35 @@
 
   "components": {
     "parameters": {
-      "tutorialId": {
+      "TutorialId": {
         "name": "tutorialId",
         "in": "query",
         "required": true,
-        "schema": { "type": "integer" }
+        "schema": { "type": "string", "example": "tutorial_1" }
       },
-      "userId": {
+      "UserId": {
         "name": "userId",
         "in": "query",
         "required": true,
-        "schema": { "type": "string" }
+        "schema": { "type": "string", "example": "user_1" }
       },
-      "level": {
+      "Level": {
         "name": "level",
         "in": "query",
         "required": true,
-        "schema": { "type": "integer" }
+        "schema": { "type": "integer", "enum": [1, 2, 3], "example": 2 }
       }
     },
 
     "schemas": {
-      "QuizQuestion": {
+      "GenerateQuizResponse": {
         "type": "object",
         "properties": {
-          "question": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["multiple_choice", "multiple_answer"]
-          },
-          "options": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "correctAnswers": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
-        }
-      },
-
-      "SaveQuizCacheRequest": {
-        "type": "object",
-        "required": ["tutorialId", "userId", "level", "quiz"],
-        "properties": {
-          "tutorialId": { "type": "integer" },
-          "userId": { "type": "string" },
-          "level": { "type": "integer" },
-          "quiz": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/QuizQuestion" }
-          }
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "tutorial": { "type": "object" },
+          "meta": { "type": "object" },
+          "quiz": { "type": "array", "items": { "type": "object" } }
         }
       },
 
@@ -371,23 +329,66 @@
         "type": "object",
         "required": ["tutorialId", "userId", "level", "progress"],
         "properties": {
-          "tutorialId": { "type": "integer" },
+          "tutorialId": { "type": "string" },
           "userId": { "type": "string" },
           "level": { "type": "integer" },
           "progress": { "type": "object" }
+        }
+      },
+
+      "SaveQuizCacheRequest": {
+        "type": "object",
+        "required": ["tutorialId", "userId", "level", "quiz"],
+        "properties": {
+          "tutorialId": { "type": "string" },
+          "userId": { "type": "string" },
+          "level": { "type": "integer" },
+          "quiz": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+
+      "SaveHistoryRequest": {
+        "type": "object",
+        "properties": {
+          "tutorialId": { "type": "string" },
+          "userId": { "type": "string" },
+          "level": { "type": "integer" },
+          "score": { "type": "integer" },
+          "totalQuestions": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "SaveHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "History saved" },
+          "entry": { "$ref": "#/components/schemas/SaveHistoryRequest" }
+        }
+      },
+
+      "GetHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "history": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SaveHistoryRequest" }
+          }
         }
       }
     },
 
     "responses": {
-      "SuccessMessage": {
-        "description": "Operation successful",
+      "BasicSuccess": {
+        "description": "Success",
         "content": {
           "application/json": {
             "schema": {
               "type": "object",
               "properties": {
-                "success": { "type": "boolean" },
+                "success": { "type": "boolean", "example": true },
                 "message": { "type": "string" }
               }
             }
