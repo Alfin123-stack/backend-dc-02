@@ -405,7 +405,3 @@ npm run dev
   * Progress: `progress:{userId}:{tutorialId}:{level}`
 
 ---
-
-## 📄 License
-
-MIT License
