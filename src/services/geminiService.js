@@ -17,12 +17,12 @@ const generateWithRetry = async (modelName, prompt, maxRetry = 3) => {
     } catch (err) {
       lastError = err;
 
-      // retry only when Gemini is overloaded
+
       if (err?.status === 503 && attempt < maxRetry) {
         console.warn(
-          `⚠ Gemini (${modelName}) overloaded. Retry ${attempt}/${maxRetry}...`
+          `Gemini (${modelName}) overloaded. Retry ${attempt}/${maxRetry}...`
         );
-        await sleep(1000 * attempt); // exponential backoff
+        await sleep(1000 * attempt);
       } else {
         throw err;
       }
@@ -32,7 +32,7 @@ const generateWithRetry = async (modelName, prompt, maxRetry = 3) => {
   throw lastError;
 };
 
-/* -------------------- main function -------------------- */
+
 export const generateQuizFromContent = async (
   htmlContent,
   count = 3,
@@ -64,9 +64,8 @@ export const generateQuizFromContent = async (
 
     return parsedJSON;
   } catch (err) {
-    console.error("❌ Error in generateQuizFromContent:", err);
+    console.error("Error in generateQuizFromContent:", err);
 
-    /* 6️⃣ Human-readable error */
     if (err?.status === 503) {
       throw new Error("AI sedang sibuk, silakan coba lagi beberapa saat");
     }
