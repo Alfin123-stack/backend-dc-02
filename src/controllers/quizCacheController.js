@@ -1,9 +1,6 @@
 import { redis } from "../utils/redis.js";
 import { parseIds, progressKey, quizKey, toBool } from "../utils/helper.js";
 
-/* ===============================
-   SAVE QUIZ CACHE
-=============================== */
 export const saveQuizCache = async (req, res) => {
   const parsed = parseIds(req.body.tutorialId, req.body.userId, req.body.level);
 
@@ -25,9 +22,6 @@ export const saveQuizCache = async (req, res) => {
   });
 };
 
-/* ===============================
-   SAVE PROGRESS
-=============================== */
 export const saveProgress = async (req, res) => {
   const parsed = parseIds(req.body.tutorialId, req.body.userId, req.body.level);
 
@@ -49,9 +43,6 @@ export const saveProgress = async (req, res) => {
   });
 };
 
-/* ===============================
-   GET PROGRESS
-=============================== */
 export const getProgress = async (req, res) => {
   const parsed = parseIds(
     req.query.tutorialId,
@@ -77,9 +68,6 @@ export const getProgress = async (req, res) => {
   });
 };
 
-/* ===============================
-   GET QUIZ CACHE
-=============================== */
 export const getQuizCache = async (req, res) => {
   const parsed = parseIds(
     req.query.tutorialId,
@@ -105,9 +93,6 @@ export const getQuizCache = async (req, res) => {
   });
 };
 
-/* ===============================
-   CLEAR QUIZ CACHE & PROGRESS
-=============================== */
 export const clearQuizCache = async (req, res) => {
   const parsed = parseIds(
     req.query.tutorialId,
@@ -146,4 +131,22 @@ export const clearQuizCache = async (req, res) => {
     message: "Cache & progress berhasil dihapus",
     deleted,
   });
+};
+
+export const clearAllCache = async (req, res) => {
+  try {
+    await redis.flushdb(); // hapus semua key di Redis
+
+    return res.status(200).json({
+      success: true,
+      message: "Semua cache Redis berhasil dihapus",
+    });
+  } catch (error) {
+    console.error("Redis FLUSH error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Gagal menghapus semua cache Redis",
+    });
+  }
 };

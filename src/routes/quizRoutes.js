@@ -9,6 +9,7 @@ import {
   getQuizCache,
   clearQuizCache,
   saveQuizCache,
+  clearAllCache,
 } from "../controllers/quizCacheController.js";
 
 import {
@@ -57,5 +58,7 @@ router.get("/quiz/history", getHistory);
 router.post("/quiz/history", saveHistory);
 
 router.delete("/quiz/history/clear", clearHistory);
+
+router.delete("/quiz/cache/clear-all", clearAllCache);
 
 export default router;
