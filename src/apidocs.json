@@ -25,33 +25,71 @@
       "get": {
         "tags": ["Users"],
         "summary": "Get user preferences",
+        "description": "Retrieve UI and theme preferences for a specific user",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": { "type": "string", "example": "user_1" }
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Preferences retrieved",
+            "description": "User preferences retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "preferences": { "type": "object" }
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User preferences retrieved successfully."
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "preference": {
+                          "type": "object",
+                          "properties": {
+                            "layoutWidth": {
+                              "type": "string",
+                              "example": "fullWidth"
+                            },
+                            "fontStyle": {
+                              "type": "string",
+                              "example": "serif"
+                            },
+                            "theme": {
+                              "type": "string",
+                              "example": "light"
+                            },
+                            "fontSize": {
+                              "type": "string",
+                              "example": "large"
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
             }
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }
     },
-
     "/quiz/generate": {
       "post": {
         "tags": ["Quiz"],
