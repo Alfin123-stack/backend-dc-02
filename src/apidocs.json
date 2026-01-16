@@ -295,12 +295,58 @@
             "description": "History retrieved",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/GetHistoryResponse" }
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/QuizHistory"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "history": [
+                    {
+                      "id": 1768495214883,
+                      "tutorialId": 35363,
+                      "userId": 3,
+                      "level": 1,
+                      "quizData": [
+                        {
+                          "question": "Pilih kemampuan-kemampuan utama dari Smart Speaker yang dijelaskan dalam teks!",
+                          "explanation": "",
+                          "type": "multiple_answer",
+                          "options": [
+                            {
+                              "key": "A",
+                              "text": "Dapat membuka aplikasi sesuai perintah verbal.",
+                              "isCorrect": true,
+                              "feedback": "Betul, Smart Speaker bisa membuka aplikasi."
+                            }
+                          ],
+                          "correctAnswers": ["A", "C", "D"],
+                          "difficulty": "easy"
+                        }
+                      ],
+                      "userAnswers": [["A", "B", "E"]],
+                      "score": 11,
+                      "totalQuestions": 3,
+                      "percentage": 367,
+                      "timestamp": "2026-01-15T16:40:14.883Z",
+                      "createdAt": "2026-01-15T16:40:16.448Z"
+                    }
+                  ]
+                }
               }
             }
           }
         }
       },
+
       "post": {
         "tags": ["History"],
         "summary": "Save quiz history",
@@ -308,22 +354,92 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SaveHistoryRequest" }
+              "schema": {
+                "$ref": "#/components/schemas/QuizHistory"
+              },
+              "example": {
+                "id": 1768495214883,
+                "tutorialId": 35363,
+                "userId": 3,
+                "level": 1,
+                "quizData": [
+                  {
+                    "question": "Pilih kemampuan-kemampuan utama dari Smart Speaker yang dijelaskan dalam teks!",
+                    "explanation": "",
+                    "type": "multiple_answer",
+                    "options": [
+                      {
+                        "key": "A",
+                        "text": "Dapat membuka aplikasi sesuai perintah verbal.",
+                        "isCorrect": true,
+                        "feedback": "Betul, Smart Speaker bisa membuka aplikasi."
+                      }
+                    ],
+                    "correctAnswers": ["A", "C", "D"],
+                    "difficulty": "easy"
+                  }
+                ],
+                "userAnswers": [["A", "B", "E"]],
+                "score": 11,
+                "totalQuestions": 3,
+                "percentage": 367,
+                "timestamp": "2026-01-15T16:40:14.883Z"
+              }
             }
           }
         },
         "responses": {
-          "200": { "$ref": "#/components/schemas/SaveHistoryResponse" }
+          "200": {
+            "description": "History saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "entry": {
+                      "$ref": "#/components/schemas/QuizHistory"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "History saved",
+                  "entry": {
+                    "id": 1768495214883,
+                    "tutorialId": 35363,
+                    "userId": 3
+                  }
+                }
+              }
+            }
+          }
         }
-      }
-    },
+      },
 
-    "/quiz/history/clear": {
       "delete": {
         "tags": ["History"],
         "summary": "Clear quiz history",
         "responses": {
-          "200": { "$ref": "#/components/responses/BasicSuccess" }
+          "200": {
+            "description": "All history cleared",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "All history cleared"
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -331,89 +447,26 @@
 
   "components": {
     "parameters": {
-      "TutorialId": {
-        "name": "tutorialId",
-        "in": "query",
-        "required": true,
-        "schema": { "type": "string", "example": "tutorial_1" }
-      },
-      "UserId": {
-        "name": "userId",
-        "in": "query",
-        "required": true,
-        "schema": { "type": "string", "example": "user_1" }
-      },
-      "Level": {
-        "name": "level",
-        "in": "query",
-        "required": true,
-        "schema": { "type": "integer", "enum": [1, 2, 3], "example": 2 }
-      }
-    },
-
-    "schemas": {
-      "GenerateQuizResponse": {
+      "QuizHistory": {
         "type": "object",
         "properties": {
-          "success": { "type": "boolean" },
-          "message": { "type": "string" },
-          "tutorial": { "type": "object" },
-          "meta": { "type": "object" },
-          "quiz": { "type": "array", "items": { "type": "object" } }
-        }
-      },
-
-      "SaveProgressRequest": {
-        "type": "object",
-        "required": ["tutorialId", "userId", "level", "progress"],
-        "properties": {
-          "tutorialId": { "type": "string" },
-          "userId": { "type": "string" },
-          "level": { "type": "integer" },
-          "progress": { "type": "object" }
-        }
-      },
-
-      "SaveQuizCacheRequest": {
-        "type": "object",
-        "required": ["tutorialId", "userId", "level", "quiz"],
-        "properties": {
-          "tutorialId": { "type": "string" },
-          "userId": { "type": "string" },
-          "level": { "type": "integer" },
-          "quiz": { "type": "array", "items": { "type": "object" } }
-        }
-      },
-
-      "SaveHistoryRequest": {
-        "type": "object",
-        "properties": {
-          "tutorialId": { "type": "string" },
-          "userId": { "type": "string" },
-          "level": { "type": "integer" },
-          "score": { "type": "integer" },
-          "totalQuestions": { "type": "integer" },
-          "createdAt": { "type": "string", "format": "date-time" }
-        }
-      },
-
-      "SaveHistoryResponse": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean", "example": true },
-          "message": { "type": "string", "example": "History saved" },
-          "entry": { "$ref": "#/components/schemas/SaveHistoryRequest" }
-        }
-      },
-
-      "GetHistoryResponse": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean", "example": true },
-          "history": {
+          "id": { "type": "number" },
+          "tutorialId": { "type": "number" },
+          "userId": { "type": "number" },
+          "level": { "type": "number" },
+          "quizData": { "type": "array", "items": { "type": "object" } },
+          "userAnswers": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/SaveHistoryRequest" }
-          }
+            "items": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "score": { "type": "number" },
+          "totalQuestions": { "type": "number" },
+          "percentage": { "type": "number" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       }
     },

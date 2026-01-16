@@ -32,7 +32,6 @@ export const saveHistory = async (req, res) => {
   return res.json({
     success: true,
     message: "History saved",
-    entry,
   });
 };
 
